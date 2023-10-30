@@ -9,6 +9,7 @@ const administratorSchema = new mongoose.Schema({
   organisation: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Organisation",
+    required: true,
   },
   name: {
     type: String,
@@ -18,7 +19,10 @@ const administratorSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  password: String,
+  password: {
+    type: String,
+    required: true,
+  },
 })
 
 export const Administrator = mongoose.model(
