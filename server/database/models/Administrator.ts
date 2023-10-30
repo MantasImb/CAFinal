@@ -23,6 +23,14 @@ const administratorSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  isOwner: {
+    type: Boolean,
+    default: false,
+  },
+  isApproved: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 export const Administrator = mongoose.model(

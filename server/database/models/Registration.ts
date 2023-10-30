@@ -5,11 +5,13 @@ const registrationSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  lastName: String,
+  lastName: {
+    type: String,
+    required: true,
+  },
   email: {
     type: String,
     required: true,
-    unique: true,
   },
   organisation: {
     type: mongoose.Schema.Types.ObjectId,
