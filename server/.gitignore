@@ -1,0 +1,16 @@
+# Logs
+logs
+*.log
+
+# Environment variables
+.env
+
+# Dependencies
+node_modules
+
+# Built files
+dist
+
+# package files
+package-lock.json
+pnpm-lock.yaml
