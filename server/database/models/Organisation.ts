@@ -4,14 +4,7 @@ const organisationSchema = new mongoose.Schema({
   organisationName: {
     type: String,
     required: true,
-    unique: true,
   },
-  administrators: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Administrator",
-    },
-  ],
   registrations: [
     {
       type: mongoose.Schema.Types.ObjectId,
