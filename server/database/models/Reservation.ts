@@ -1,6 +1,6 @@
-import mongoose from "mongoose"
+import mongoose from "mongoose";
 
-const registrationSchema = new mongoose.Schema({
+const reservationSchema = new mongoose.Schema({
   firstName: {
     type: String,
     required: true,
@@ -25,6 +25,6 @@ const registrationSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
-})
+});
 
-export const Registration = mongoose.model("Registration", registrationSchema)
+export const Reservation = mongoose.model("Reservation", reservationSchema);

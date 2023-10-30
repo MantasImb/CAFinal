@@ -1,4 +1,4 @@
-import mongoose from "mongoose"
+import mongoose from "mongoose";
 
 const administratorSchema = new mongoose.Schema({
   email: {
@@ -31,9 +31,9 @@ const administratorSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-})
+});
 
 export const Administrator = mongoose.model(
   "Administrator",
   administratorSchema
-)
+);

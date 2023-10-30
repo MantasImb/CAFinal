@@ -1,4 +1,4 @@
-import { Registration } from "../models/Registration"
+import { Reservation } from "../models/Reservation";
 
 export async function createRegistration(
   firstName: string,
@@ -7,16 +7,16 @@ export async function createRegistration(
   organisationId: string,
   registeredBy: string
 ) {
-  return Registration.create({
+  return Reservation.create({
     firstName,
     lastName,
     email,
     organisation: organisationId,
     registeredBy,
     time: new Date(),
-  })
+  });
 }
 
 export async function deleteRegistration(registrationId: string) {
-  return Registration.findByIdAndDelete(registrationId)
+  return Reservation.findByIdAndDelete(registrationId);
 }

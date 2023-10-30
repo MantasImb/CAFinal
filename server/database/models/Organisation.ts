@@ -1,16 +1,22 @@
-import mongoose from "mongoose"
+import mongoose from "mongoose";
 
 const organisationSchema = new mongoose.Schema({
   organisationName: {
     type: String,
     required: true,
   },
-  registrations: [
+  reservations: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Registration",
+      ref: "Reservation",
     },
   ],
-})
+  administrators: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Administrator",
+    },
+  ],
+});
 
-export const Organisation = mongoose.model("Organisation", organisationSchema)
+export const Organisation = mongoose.model("Organisation", organisationSchema);
