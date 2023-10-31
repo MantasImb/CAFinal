@@ -1,21 +1,17 @@
-import mongoose from "mongoose";
+import mongoose from "mongoose"
 
 const reservationSchema = new mongoose.Schema({
-  firstName: {
+  name: {
     type: String,
     required: true,
   },
-  lastName: {
+  surname: {
     type: String,
     required: true,
   },
   email: {
     type: String,
     required: true,
-  },
-  organisation: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Organisation",
   },
   registeredBy: {
     type: mongoose.Schema.Types.ObjectId,
@@ -25,6 +21,6 @@ const reservationSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
-});
+})
 
-export const Reservation = mongoose.model("Reservation", reservationSchema);
+export const Reservation = mongoose.model("Reservation", reservationSchema)

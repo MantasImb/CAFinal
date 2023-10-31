@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from "mongoose"
 
 const organisationSchema = new mongoose.Schema({
   organisationName: {
@@ -17,6 +17,11 @@ const organisationSchema = new mongoose.Schema({
       ref: "Administrator",
     },
   ],
-});
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Administrator",
+    required: true,
+  },
+})
 
-export const Organisation = mongoose.model("Organisation", organisationSchema);
+export const Organisation = mongoose.model("Organisation", organisationSchema)

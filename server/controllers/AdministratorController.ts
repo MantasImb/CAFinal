@@ -1,34 +1,32 @@
-import { type Response } from "express";
+import { type Response, type NextFunction } from "express"
 import {
   createAdministrator,
   createOwner,
   approveAdministrator,
-} from "../database/methods/administrator";
+} from "../database/methods/administrator"
 
 export type createAdministratorRequest = {
   body: {
-    email: string;
-    name: string;
-    surname: string;
-    password: string;
-    organisationId: string;
-  };
-};
+    email: string
+    name: string
+    surname: string
+    password: string
+    isOwner: boolean
+  }
+}
 
 export async function registerAdministrator(
   req: createAdministratorRequest,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) {
-  const { email, name, surname, password, organisationId } = req.body;
-  await createAdministrator(email, name, surname, password, organisationId);
-  res.sendStatus(200);
-}
-
-export async function registerOwner(
-  req: createAdministratorRequest,
-  res: Response
-) {
-  const { email, name, surname, password, organisationId } = req.body;
-  await createOwner(email, name, surname, password, organisationId);
-  res.sendStatus(200);
+  try {
+    const { email, name, surname, password, isOwner } = req.body
+    isOwner
+      ? await createAdministrator(email, name, surname, password)
+      : await createOwner(email, name, surname, password)
+    res.sendStatus(200)
+  } catch (error) {
+    next(error)
+  }
 }
