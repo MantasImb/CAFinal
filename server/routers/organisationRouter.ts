@@ -1,11 +1,15 @@
-import express from "express"
+import express from "express";
 import {
   registerOrganisation,
   createReservation,
-} from "../controllers/organisationController"
+  getReservations,
+} from "../controllers/organisationController";
 
-export const router = express.Router()
+export const router = express.Router();
 
-router.route("/").post(registerOrganisation)
+router.route("/").post(registerOrganisation);
 
-router.route("/reservation").post(createReservation)
+router
+  .route("/:organisationId/reservation")
+  .post(createReservation)
+  .get(getReservations);

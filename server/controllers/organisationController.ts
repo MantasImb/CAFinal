@@ -1,13 +1,13 @@
-import { type Response, type NextFunction } from "express"
-import { Organisation } from "../models/Organisation"
+import { type Response, type NextFunction, type Request } from "express";
+import { Organisation } from "../models/Organisation";
 
 // main organisation functionality
 
-export type createOrganisationRequest = {
+export interface createOrganisationRequest extends Request {
   body: {
-    organisationName: string
-    owner: string
-  }
+    organisationName: string;
+    owner: string;
+  };
 }
 
 export async function registerOrganisation(
@@ -16,25 +16,27 @@ export async function registerOrganisation(
   next: NextFunction
 ) {
   try {
-    const { organisationName, owner } = req.body
-    const organisation = await Organisation.create({ organisationName, owner })
-    res.status(200).json(organisation._id)
+    const { organisationName, owner } = req.body;
+    const organisation = await Organisation.create({ organisationName, owner });
+    res.status(200).json(organisation._id);
   } catch (error) {
-    next(error)
+    next(error);
   }
 }
 
-// registrations
+// reservations
 
-export type createReservationRequest = {
+export interface createReservationRequest extends Request {
   body: {
-    organisationId: string
-    name: string
-    surname: string
-    email: string
-    registeredBy: string
-    timestamp: number
-  }
+    name: string;
+    surname: string;
+    email: string;
+    registeredBy: string;
+    timestamp: number;
+  };
+  params: {
+    organisationId: string;
+  };
 }
 
 export async function createReservation(
@@ -43,13 +45,14 @@ export async function createReservation(
   next: NextFunction
 ) {
   try {
-    const { organisationId, name, surname, email, registeredBy, timestamp } =
-      req.body
-    const organisation = await Organisation.findById(organisationId)
+    const { name, surname, email, registeredBy, timestamp } = req.body;
+
+    const { organisationId } = req.params;
+    const organisation = await Organisation.findById(organisationId);
 
     if (!organisation) {
-      res.status(404).json("Organisation not found")
-      return
+      res.status(404).json("Organisation not found");
+      return;
     }
 
     organisation.reservations.push({
@@ -58,9 +61,34 @@ export async function createReservation(
       email,
       registeredBy,
       timestamp,
-    })
-    res.status(200)
+    });
+    organisation.save();
+
+    res.sendStatus(200);
   } catch (error) {
-    next(error)
+    next(error);
+  }
+}
+
+export interface getReservationsRequest extends Request {
+  params: {
+    organisationId: string;
+  };
+}
+
+export async function getReservations(
+  req: getReservationsRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const { organisationId } = req.params;
+    const organisation = await Organisation.findById(organisationId);
+
+    if (!organisation) return res.status(404).json("Organisation not found");
+
+    res.status(200).json(organisation.reservations);
+  } catch (error) {
+    next(error);
   }
 }
