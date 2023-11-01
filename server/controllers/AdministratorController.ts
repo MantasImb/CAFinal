@@ -1,9 +1,5 @@
 import { type Response, type NextFunction } from "express"
-import {
-  createAdministrator,
-  createOwner,
-  approveAdministrator,
-} from "../database/methods/administrator"
+import { Administrator } from "../models/Administrator"
 
 export type createAdministratorRequest = {
   body: {
@@ -22,10 +18,10 @@ export async function registerAdministrator(
 ) {
   try {
     const { email, name, surname, password, isOwner } = req.body
-    isOwner
-      ? await createAdministrator(email, name, surname, password)
-      : await createOwner(email, name, surname, password)
-    res.sendStatus(200)
+    const administrator = isOwner
+      ? await Administrator.create({ email, name, surname, password })
+      : await Administrator.create({ email, name, surname, password, isOwner })
+    res.status(200).json(administrator._id)
   } catch (error) {
     next(error)
   }

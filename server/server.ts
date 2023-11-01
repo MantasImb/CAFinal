@@ -5,9 +5,10 @@ import { env } from "./config/env"
 import errorHandler from "./middlewares/errorHandler"
 
 import { router as administratorRouter } from "./routers/administratorRouter"
+import { router as organisationRouter } from "./routers/organisationRouter"
 
 // Database
-import { connectDB } from "./database/connection"
+import { connectDB } from "./config/dbConnection"
 connectDB(env.MONGODB_URL)
 
 // Server
@@ -17,6 +18,7 @@ app.use(express.json())
 
 // Routes
 app.use("/administrator", administratorRouter)
+app.use("/organisation", organisationRouter)
 
 // Error handling
 app.use(errorHandler)
