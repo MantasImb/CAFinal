@@ -6,11 +6,6 @@ const administratorSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  organisation: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Organisation",
-    required: true,
-  },
   name: {
     type: String,
     required: true,
