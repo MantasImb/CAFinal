@@ -17,8 +17,8 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-app.use("/administrator", administratorRouter);
-app.use("/organisation", organisationRouter);
+app.use("/api/administrator", administratorRouter);
+app.use("/api/organisation", organisationRouter);
 
 // Error handling
 app.use(errorHandler);
