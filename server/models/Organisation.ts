@@ -1,32 +1,33 @@
-import mongoose from "mongoose"
+import mongoose from "mongoose";
 
 const reservationSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true,
+    required: [true, "Name is required"],
   },
   surname: {
     type: String,
-    required: true,
+    required: [true, "Surname is required"],
   },
   email: {
     type: String,
-    required: true,
+    required: [true, "Email is required"],
   },
   registeredBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Administrator",
+    required: [true, "Registered by is required"],
   },
   timestamp: {
     type: Number,
-    required: true,
+    required: [true, "Timestamp is required"],
   },
-})
+});
 
 const organisationSchema = new mongoose.Schema({
   organisationName: {
     type: String,
-    required: true,
+    required: [true, "Organisation name is required"],
     unique: true,
   },
   reservations: [reservationSchema],
@@ -39,9 +40,8 @@ const organisationSchema = new mongoose.Schema({
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Administrator",
-    required: true,
-    unique: true,
+    required: [true, "Owner is required"],
   },
-})
+});
 
-export const Organisation = mongoose.model("Organisation", organisationSchema)
+export const Organisation = mongoose.model("Organisation", organisationSchema);

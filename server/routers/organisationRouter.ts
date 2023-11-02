@@ -4,12 +4,13 @@ import {
   createReservation,
   getReservations,
 } from "../controllers/organisationController";
+import { protect } from "../middlewares/auth";
 
 export const router = express.Router();
 
-router.route("/").post(registerOrganisation);
+router.route("/").post(protect, registerOrganisation);
 
 router
   .route("/:organisationId/reservation")
-  .post(createReservation)
-  .get(getReservations);
+  .post(protect, createReservation)
+  .get(protect, getReservations);
