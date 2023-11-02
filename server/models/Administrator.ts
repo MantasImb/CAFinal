@@ -1,22 +1,23 @@
-import mongoose from "mongoose"
+import mongoose, { InferSchemaType } from "mongoose";
 
 const administratorSchema = new mongoose.Schema({
   email: {
     type: String,
-    required: true,
+    required: [true, "Email is required"],
     unique: true,
   },
   name: {
     type: String,
-    required: true,
+    required: [true, "Name is required"],
   },
   surname: {
     type: String,
-    required: true,
+    required: [true, "Surname is required"],
   },
   password: {
     type: String,
-    required: true,
+    required: [true, "Password is required"],
+    // TODO: add password validation somewhere
   },
   isOwner: {
     type: Boolean,
@@ -26,9 +27,11 @@ const administratorSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-})
+});
 
 export const Administrator = mongoose.model(
   "Administrator",
   administratorSchema
-)
+);
+
+export type AdministratorType = InferSchemaType<typeof administratorSchema>;

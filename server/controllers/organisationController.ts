@@ -1,23 +1,42 @@
 import { type Response, type NextFunction, type Request } from "express";
+import { type AuthorisedRequest } from "../middlewares/auth";
+import z from "zod";
 import { Organisation } from "../models/Organisation";
+import { AppError } from "../middlewares/errorHandler";
+
+// TODO: make a separate function method to get organisation by id?
+// TODO: add zod validation
 
 // main organisation functionality
 
-export interface createOrganisationRequest extends Request {
-  body: {
-    organisationName: string;
-    owner: string;
-  };
-}
+export const createOrganisationRequestSchema = z.object({
+  organisationName: z.string(),
+});
 
+/** Register a new organisation
+ * @route POST /api/organisation
+ * @access private
+ */
 export async function registerOrganisation(
-  req: createOrganisationRequest,
+  req: AuthorisedRequest,
   res: Response,
   next: NextFunction
 ) {
   try {
-    const { organisationName, owner } = req.body;
-    const organisation = await Organisation.create({ organisationName, owner });
+    const validatedBody = createOrganisationRequestSchema.safeParse(req.body);
+    if (!validatedBody.success) throw new AppError("Invalid body", 400);
+
+    const { organisationName } = req.body;
+    const organisationNameTaken = await Organisation.exists({
+      organisationName,
+    });
+    if (organisationNameTaken)
+      throw new AppError("Organisation name already exists", 400);
+
+    const organisation = await Organisation.create({
+      organisationName,
+      owner: req.administrator!._id,
+    });
     res.status(200).json(organisation._id);
   } catch (error) {
     next(error);
@@ -26,40 +45,38 @@ export async function registerOrganisation(
 
 // reservations
 
-export interface createReservationRequest extends Request {
-  body: {
-    name: string;
-    surname: string;
-    email: string;
-    registeredBy: string;
-    timestamp: number;
-  };
-  params: {
-    organisationId: string;
-  };
-}
+export const createReservationRequestSchema = z.object({
+  name: z.string(),
+  surname: z.string(),
+  email: z.string().email(),
+  timestamp: z.number(),
+});
 
+/** Create a new reservation
+ * @route POST /api/organisation/:organisationId/reservation
+ * @access private
+ */
 export async function createReservation(
-  req: createReservationRequest,
+  req: AuthorisedRequest,
   res: Response,
   next: NextFunction
 ) {
   try {
-    const { name, surname, email, registeredBy, timestamp } = req.body;
+    const validatedBody = createReservationRequestSchema.safeParse(req.body);
+    if (!validatedBody.success) throw new AppError("Invalid body", 400);
+
+    const { name, surname, email, timestamp } = req.body;
 
     const { organisationId } = req.params;
     const organisation = await Organisation.findById(organisationId);
 
-    if (!organisation) {
-      res.status(404).json("Organisation not found");
-      return;
-    }
+    if (!organisation) throw new AppError("Organisation not found", 404);
 
     organisation.reservations.push({
       name,
       surname,
       email,
-      registeredBy,
+      registeredBy: req.administrator!._id,
       timestamp,
     });
     organisation.save();
@@ -70,14 +87,12 @@ export async function createReservation(
   }
 }
 
-export interface getReservationsRequest extends Request {
-  params: {
-    organisationId: string;
-  };
-}
-
+/** Get all reservations for an organisation
+ * @route GET /api/organisation/:organisationId/reservation
+ * @access private
+ */
 export async function getReservations(
-  req: getReservationsRequest,
+  req: AuthorisedRequest,
   res: Response,
   next: NextFunction
 ) {
@@ -85,7 +100,7 @@ export async function getReservations(
     const { organisationId } = req.params;
     const organisation = await Organisation.findById(organisationId);
 
-    if (!organisation) return res.status(404).json("Organisation not found");
+    if (!organisation) throw new AppError("Organisation not found", 404);
 
     res.status(200).json(organisation.reservations);
   } catch (error) {
