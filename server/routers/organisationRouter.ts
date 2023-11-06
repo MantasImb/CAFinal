@@ -2,15 +2,23 @@ import express from "express";
 import {
   registerOrganisation,
   createReservation,
-  getReservations,
+  getOrganisation,
+  getOwnerOrganisation,
+  updateReservationTime,
+  deleteReservation,
 } from "../controllers/organisationController";
 import { protect } from "../middlewares/auth";
 
 export const router = express.Router();
 
-router.route("/").post(protect, registerOrganisation);
+router
+  .route("/")
+  .get(protect, getOwnerOrganisation)
+  .post(protect, registerOrganisation);
 
 router
-  .route("/:organisationId/reservation")
+  .route("/:organisationId")
   .post(protect, createReservation)
-  .get(protect, getReservations);
+  .get(protect, getOrganisation)
+  .put(protect, updateReservationTime)
+  .delete(protect, deleteReservation);

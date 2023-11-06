@@ -1,10 +1,11 @@
-import { type Request, type Response, type NextFunction } from "express";
+import { type Response, type NextFunction } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import z from "zod";
 import { Administrator } from "../models/Administrator";
 import { AppError } from "../middlewares/errorHandler";
 import { env } from "../config/env";
+import { type AuthorisedRequest } from "../middlewares/auth";
 
 // JWT
 function generateToken(id: string) {
@@ -24,17 +25,20 @@ export const createAdministratorRequestSchema = z.object({
  * @access public
  */
 export async function registerAdministrator(
-  req: Request,
+  req: AuthorisedRequest,
   res: Response,
   next: NextFunction
 ) {
   try {
     const validatedBody = createAdministratorRequestSchema.safeParse(req.body);
+
     if (!validatedBody.success) throw new AppError("Invalid body", 400);
 
     const { email, name, surname, password, isOwner } = req.body;
 
-    const emailExists = await Administrator.exists({ email });
+    const emailLowerCase = email.toLowerCase();
+
+    const emailExists = await Administrator.exists({ email: emailLowerCase });
     if (emailExists) throw new AppError("Email already exists", 400);
 
     // hash password
@@ -43,13 +47,13 @@ export async function registerAdministrator(
 
     const administrator = isOwner
       ? await Administrator.create({
-          email,
+          email: emailLowerCase,
           name,
           surname,
           password: hashedPassword,
         })
       : await Administrator.create({
-          email,
+          email: emailLowerCase,
           name,
           surname,
           password: hashedPassword,
@@ -79,7 +83,7 @@ export const loginAdministratorRequestSchema = z.object({
  * @access public
  */
 export async function loginAdministrator(
-  req: Request,
+  req: AuthorisedRequest,
   res: Response,
   next: NextFunction
 ) {
@@ -89,8 +93,10 @@ export async function loginAdministrator(
 
     const { email, password } = req.body;
 
+    const emailLowerCase = email.toLowerCase();
+
     const administrator = await Administrator.findOne({
-      email,
+      email: emailLowerCase,
     });
     if (!administrator) throw new AppError("Invalid email", 404);
 
@@ -119,7 +125,7 @@ export const getAdministratorRequestSchema = z.object({
  * @access private
  */
 export async function getAdministrator(
-  req: Request,
+  req: AuthorisedRequest,
   res: Response,
   next: NextFunction
 ) {
@@ -128,7 +134,12 @@ export async function getAdministrator(
     if (!validatedParams.success) throw new AppError("Invalid params", 400);
 
     const { administratorId } = req.params;
-    const administrator = await Administrator.findById(administratorId);
+
+    // if the administrator is requesting their own data, use the req.administrator object
+    const administrator =
+      administratorId === req.administrator?._id
+        ? req.administrator
+        : await Administrator.findById(administratorId);
 
     if (!administrator) throw new AppError("Administrator not found", 404);
 
