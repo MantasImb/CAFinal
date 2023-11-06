@@ -1,9 +1,12 @@
 import z from "zod";
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { toast } from "react-toastify";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { login, reset } from "../features/auth/authSlice";
+import {
+  registerOrganisation,
+  reset,
+} from "../features/organisation/organisationSlice";
 import { type RootState, type AppDispatch } from "../app/store";
 import { Input } from "../components/Input";
 import Button from "../components/Button";
@@ -11,48 +14,45 @@ import LoadingSpinner from "../components/LoadingSpinner";
 
 const formInputs = [
   {
-    name: "email",
+    name: "organisationName",
     type: "text",
-    placeholder: "Your email",
-  },
-  {
-    name: "password",
-    type: "password",
-    placeholder: "Your password",
+    placeholder: "The organisation's name",
   },
 ];
 
 const zodSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(1, "Please enter a password"),
+  organisationName: z.string().min(1, "Please enter a name"),
 });
 
-export default function Login() {
+// IMPORTANT: This component is currently small and takes only one input,
+// the usage of a separate page component instead of a modal is currently
+// not justified. However, since more inputs are to be added in the future,
+// it is better to use a separate page component now, instead of refactoring
+export default function RegisterOrganisation() {
   const [formData, setFormData] = useState<z.infer<typeof zodSchema>>({
-    email: "",
-    password: "",
+    organisationName: "",
   });
   const inputRefs = useRef<Record<string, HTMLInputElement>>({});
   const [errors, setErrors] = useState<string[]>([]);
 
   const navigate = useNavigate();
   const dispatch: AppDispatch = useDispatch();
-  const { user, isLoading, isError, isSuccess, message } = useSelector(
-    (state: RootState) => state.auth
+  const { organisation, isLoading, isError, isSuccess, message } = useSelector(
+    (state: RootState) => state.organisation
   );
 
   useEffect(() => {
     if (isError) {
       toast.error(message);
     }
-    if (isSuccess || user) {
+    if (isSuccess || organisation) {
       message && toast.success(message);
       dispatch(reset());
       navigate("/");
     }
 
     dispatch(reset());
-  }, [user, isError, isSuccess, message, dispatch, navigate]);
+  }, [organisation, isError, isSuccess, message, dispatch, navigate]);
 
   function onChange(e: React.ChangeEvent<HTMLInputElement>) {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -77,12 +77,12 @@ export default function Login() {
     e.preventDefault();
     const validationPassed = validateForm(formData);
     if (!validationPassed) return;
-    dispatch(login(formData));
+    dispatch(registerOrganisation(formData));
   }
 
   return (
     <div>
-      <h1 className="">Login</h1>
+      <h1 className="">Register organisation</h1>
       <form action="submit" onSubmit={onSubmit}>
         {formInputs.map((input) => (
           <Input
@@ -90,7 +90,6 @@ export default function Login() {
             name={input.name}
             type={input.type}
             placeholder={input.placeholder}
-            // magic
             value={formData[input.name as keyof typeof formData]}
             onChange={onChange}
             // "!" ???
@@ -106,7 +105,11 @@ export default function Login() {
             ))}
           </ul>
         )}
-        {isLoading ? <LoadingSpinner /> : <Button>Login</Button>}
+        {isLoading ? (
+          <LoadingSpinner />
+        ) : (
+          <Button>Register organisation</Button>
+        )}
       </form>
     </div>
   );

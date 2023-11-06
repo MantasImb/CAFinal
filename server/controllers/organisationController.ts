@@ -3,9 +3,9 @@ import { type AuthorisedRequest } from "../middlewares/auth";
 import z from "zod";
 import { Organisation } from "../models/Organisation";
 import { AppError } from "../middlewares/errorHandler";
+import mongoose from "mongoose";
 
 // TODO: make a separate function method to get organisation by id?
-// TODO: add zod validation
 
 // main organisation functionality
 
@@ -37,7 +37,53 @@ export async function registerOrganisation(
       organisationName,
       owner: req.administrator!._id,
     });
-    res.status(200).json(organisation._id);
+    res.status(200).json(organisation);
+  } catch (error) {
+    next(error);
+  }
+}
+
+/** Get organisation that user is owner of
+ * @route GET /api/organisation
+ * @access private
+ */
+export async function getOwnerOrganisation(
+  req: AuthorisedRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const organisation = await Organisation.findOne({
+      owner: req.administrator!._id,
+    }).populate("administrators", "-password");
+
+    if (!organisation) throw new AppError("Organisation not found", 404);
+
+    res.status(200).json(organisation);
+  } catch (error) {
+    next(error);
+  }
+}
+
+/** Get an organisation (with its reservations and administrators)
+ * @route GET /api/organisation/:organisationId
+ * @access private
+ */
+export async function getOrganisation(
+  req: AuthorisedRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const { organisationId } = req.params;
+    const organisation = await Organisation.findById(organisationId).populate(
+      "administrators",
+      "-password"
+    );
+
+    if (!organisation) throw new AppError("Organisation not found", 404);
+
+    res.status(200).json(organisation);
   } catch (error) {
     next(error);
   }
@@ -53,7 +99,7 @@ export const createReservationRequestSchema = z.object({
 });
 
 /** Create a new reservation
- * @route POST /api/organisation/:organisationId/reservation
+ * @route POST /api/organisation/:organisationId
  * @access private
  */
 export async function createReservation(
@@ -72,37 +118,89 @@ export async function createReservation(
 
     if (!organisation) throw new AppError("Organisation not found", 404);
 
-    organisation.reservations.push({
+    const reservation = {
       name,
       surname,
       email,
       registeredBy: req.administrator!._id,
       timestamp,
-    });
+    };
+
+    organisation.reservations.push(reservation);
     organisation.save();
 
-    res.sendStatus(200);
+    res.status(200).json(reservation);
   } catch (error) {
     next(error);
   }
 }
 
-/** Get all reservations for an organisation
- * @route GET /api/organisation/:organisationId/reservation
+export const updateReservationTimeRequestSchema = z.object({
+  reservationId: z.string(),
+  timestamp: z.number(),
+});
+
+/** Update time reservation
+ * @route PUT /api/organisation/:organisationId
  * @access private
  */
-export async function getReservations(
+export async function updateReservationTime(
   req: AuthorisedRequest,
   res: Response,
   next: NextFunction
 ) {
   try {
+    const validatedBody = updateReservationTimeRequestSchema.safeParse(
+      req.body
+    );
+    if (!validatedBody.success) throw new AppError("Invalid body", 400);
+
+    const { reservationId } = req.body;
+
     const { organisationId } = req.params;
     const organisation = await Organisation.findById(organisationId);
 
     if (!organisation) throw new AppError("Organisation not found", 404);
 
-    res.status(200).json(organisation.reservations);
+    const reservation = organisation.reservations.id(reservationId);
+    if (!reservation) throw new AppError("Reservation not found", 404);
+
+    reservation.timestamp = req.body.timestamp;
+    organisation.save();
+
+    res.status(200).json(reservation);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export const deleteReservationRequestSchema = z.object({
+  reservationId: z.string(),
+});
+
+/** Delete a reservation
+ * @route DELETE /api/organisation/:organisationId
+ * @access private
+ */
+export async function deleteReservation(
+  req: AuthorisedRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const validatedBody = deleteReservationRequestSchema.safeParse(req.body);
+    if (!validatedBody.success) throw new AppError("Invalid body", 400);
+
+    const { reservationId } = req.body;
+
+    const { organisationId } = req.params;
+    const organisation = await Organisation.findById(organisationId);
+
+    if (!organisation) throw new AppError("Organisation not found", 404);
+
+    organisation.reservations.pull(reservationId);
+
+    res.status(200).json({ reservationId });
   } catch (error) {
     next(error);
   }
