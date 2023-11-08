@@ -1,7 +1,7 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import z from "zod";
-import { AppDispatch } from "../app/store";
-import { useDispatch } from "react-redux";
+import { AppDispatch, RootState } from "../app/store";
+import { useDispatch, useSelector } from "react-redux";
 import { createReservation } from "../features/organisation/organisationSlice";
 import { toast } from "react-toastify";
 
@@ -13,21 +13,20 @@ import Button from "./Button";
 import { Input } from "./Input";
 
 const inputs = [
-  // {name: "time", type: "number", placeholder: "Time"},
   {
     name: "name",
     type: "text",
-    placeholder: "Your first name",
+    placeholder: "Customer first name",
   },
   {
     name: "surname",
     type: "text",
-    placeholder: "Your last name",
+    placeholder: "Customer last name",
   },
   {
     name: "email",
     type: "text",
-    placeholder: "Your email",
+    placeholder: "Customer email",
   },
 ];
 
@@ -57,7 +56,21 @@ export default function NewReservationModal() {
   );
   const inputRefs = useRef<Record<string, HTMLInputElement>>({});
   const dispatch: AppDispatch = useDispatch();
+  const { isSuccess, isLoading } = useSelector(
+    (state: RootState) => state.organisation
+  );
   const [errors, setErrors] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (isSuccess) {
+      setIsOpen(false);
+      setFormData({
+        name: "",
+        surname: "",
+        email: "",
+      });
+    }
+  }, [isSuccess, isLoading]);
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -88,7 +101,9 @@ export default function NewReservationModal() {
 
   return (
     <>
-      <Button onClick={() => setIsOpen(true)}>New Reservation</Button>
+      <Button onClick={() => setIsOpen(true)} className="max-w-max">
+        New Reservation
+      </Button>
       <Modal
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
@@ -99,9 +114,10 @@ export default function NewReservationModal() {
         <div className="flex flex-col gap-4 w-80">
           <h2 className="text-lg font-bold">Create a new reservation</h2>
           <DatePicker
+            placeholderText="Select a date and time"
             minDate={new Date(currentTime)}
             maxDate={new Date(currentTime.setMonth(currentTime.getMonth() + 1))}
-            // assuming working hours are 8am - 8pm
+            // assuming working hours are 8am - 9pm
             minTime={new Date(currentTime.setHours(8, 0, 0, 0))}
             maxTime={new Date(currentTime.setHours(20, 0, 0, 0))}
             className="border rounded-md p-2 w-full"
@@ -124,13 +140,16 @@ export default function NewReservationModal() {
             />
           ))}
           {errors.length > 0 && (
-            <ul>
-              {errors.map((error) => (
-                <li className="text-red-500" key={error}>
-                  {error}
-                </li>
-              ))}
-            </ul>
+            <>
+              <ul>
+                <p className="text-gray-500">Please fix the following:</p>
+                {errors.map((error) => (
+                  <li className="text-red-500" key={error}>
+                    {error}
+                  </li>
+                ))}
+              </ul>
+            </>
           )}
         </div>
       </Modal>

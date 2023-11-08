@@ -13,6 +13,7 @@ export const Input = forwardRef<
       placeholder={placeholder}
       onChange={onChange}
       ref={ref}
+      autoComplete="off"
     />
   );
 });

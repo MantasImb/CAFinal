@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../app/store";
 import {
@@ -12,6 +12,7 @@ import LoadingSpinner from "../components/LoadingSpinner";
 import ReservationTable from "../components/ReservationTable";
 import NewReservationModal from "../components/NewReservationModal";
 import { toast } from "react-toastify";
+import Button from "../components/Button";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -27,52 +28,74 @@ export default function Dashboard() {
       navigate("/login");
     }
 
-    if (!organisation) {
-      navigate("/organisation/register");
-    }
+    if (user && organisation === null) dispatch(getOwnerOrganisation());
 
-    if (!organisation) dispatch(getOwnerOrganisation());
-
-    return () => {
-      dispatch(reset());
-    };
-  }, [user, navigate, dispatch, isError, message, organisation]);
-
-  useEffect(() => {
     if (isError) {
       toast.error(message);
     }
 
-    if (isSuccess && message) {
-      toast.success(message);
+    if (isSuccess) {
+      message && toast.success(message);
     }
-  }, [isError, message, isSuccess]);
+    return () => {
+      reset();
+    };
+  }, [user, navigate, dispatch, organisation, isError, message, isSuccess]);
 
   if (organisation === null && isLoading) {
-    return <LoadingSpinner size={12} />;
-  }
-
-  if (isError) {
-    return <div>{message}</div>;
-  }
-
-  if (organisation === null) {
     return (
-      <div>
-        <Link to={"/organisation/register"}>Register your organisation</Link>
+      <div className="flex items-center justify-center gap-4 p-4">
+        <h1 className="text-3xl font-bold text-gray-500">
+          Loading organisation data...
+        </h1>
+        <LoadingSpinner />
       </div>
-    ); // TODO
+    );
   }
 
-  if (organisation.reservations.length === 0) {
-    return <div>No reservations</div>; // TODO - add button to create reservation
+  if (organisation === null || isError) {
+    return (
+      <div className="flex items-center justify-center flex-col text-4xl font-bold p-8">
+        <i>ERROR</i>
+        Something went wrong, please try again later
+      </div>
+    );
+  }
+
+  if (organisation === undefined) {
+    return (
+      <div className="flex items-center justify-center flex-col gap-2 text-2xl font-bold p-8 text-gray-500">
+        <i>NO ORGANISATION</i>
+        <Button
+          onClick={() => navigate("/organisation/register")}
+          className="w-auto"
+        >
+          Register your organisation
+        </Button>
+      </div>
+    );
   }
 
   return (
-    <div>
-      Dashboard
-      <NewReservationModal />
-      <ReservationTable data={organisation.reservations} />
+    <div className="flex flex-col items-center gap-4 p-4">
+      <div className="flex items-center justify-around w-full">
+        <h1 className="text-3xl font-bold text-gray-500">
+          {organisation?.organisationName}
+        </h1>
+        <NewReservationModal />
+      </div>
+      {organisation?.reservations.length ? (
+        <ReservationTable data={organisation.reservations} />
+      ) : (
+        <>
+          <p className="text-2xl font-bold text-gray-500">
+            No reservations yet
+          </p>
+          <p className="text-xl text-gray-500">
+            Start by creating a new reservation!
+          </p>
+        </>
+      )}
     </div>
   );
 }

@@ -2,7 +2,7 @@ import express from "express";
 import {
   registerOrganisation,
   createReservation,
-  getOrganisation,
+  // getOrganisation,
   getOwnerOrganisation,
   updateReservationTime,
   deleteReservation,
@@ -19,6 +19,6 @@ router
 router
   .route("/:organisationId")
   .post(protect, createReservation)
-  .get(protect, getOrganisation)
+  // .get(protect, getOrganisation)
   .put(protect, updateReservationTime)
   .delete(protect, deleteReservation);

@@ -13,7 +13,7 @@ async function register(organisationData: object, token: string) {
   });
   const data = await response.json();
 
-  if (!response.ok || !data) throw new Error(data.message);
+  if (!response.ok) throw new Error(data.message);
 
   return data;
 }
@@ -30,7 +30,8 @@ async function getOwnerOrganisation(token: string) {
   });
   const data = await response.json();
 
-  if (!response.ok || !data) throw new Error(data.message);
+  if (response.status === 404) return undefined;
+  if (!response.ok) throw new Error(data.message);
 
   return data;
 }
@@ -52,7 +53,7 @@ async function registerReservation(
   });
   const data = await response.json();
 
-  if (!response.ok || !data) throw new Error(data.message);
+  if (!response.ok) throw new Error(data.message);
 
   return data;
 }
@@ -75,7 +76,7 @@ async function updateReservationDate(
   });
   const data = await response.json();
 
-  if (!response.ok || !data) throw new Error(data.message);
+  if (!response.ok) throw new Error(data.message);
 
   return data;
 }
@@ -97,7 +98,7 @@ async function deleteReservation(
   });
   const data = await response.json();
 
-  if (!response.ok || !data) throw new Error(data.message);
+  if (!response.ok) throw new Error(data.message);
 
   return data;
 }

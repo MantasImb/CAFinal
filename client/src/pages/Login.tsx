@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { login, reset } from "../features/auth/authSlice";
+import { reset as resetOrganisation } from "../features/organisation/organisationSlice";
 import { type RootState, type AppDispatch } from "../app/store";
 import { Input } from "../components/Input";
 import Button from "../components/Button";
@@ -40,8 +41,13 @@ export default function Login() {
   const { user, isLoading, isError, isSuccess, message } = useSelector(
     (state: RootState) => state.auth
   );
+  const { organisation } = useSelector(
+    (state: RootState) => state.organisation
+  );
 
   useEffect(() => {
+    organisation && dispatch(resetOrganisation());
+
     if (isError) {
       toast.error(message);
     }
@@ -52,7 +58,7 @@ export default function Login() {
     }
 
     dispatch(reset());
-  }, [user, isError, isSuccess, message, dispatch, navigate]);
+  }, [user, isError, isSuccess, message, dispatch, navigate, organisation]);
 
   function onChange(e: React.ChangeEvent<HTMLInputElement>) {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -81,9 +87,13 @@ export default function Login() {
   }
 
   return (
-    <div>
-      <h1 className="">Login</h1>
-      <form action="submit" onSubmit={onSubmit}>
+    <div className="flex flex-col items-center gap-4 p-4">
+      <h1 className="text-3xl font-bold text-gray-500">Login</h1>
+      <form
+        className="flex flex-col items-center gap-2 border rounded-md p-4"
+        action="submit"
+        onSubmit={onSubmit}
+      >
         {formInputs.map((input) => (
           <Input
             key={input.name}
@@ -98,13 +108,16 @@ export default function Login() {
           />
         ))}
         {errors.length > 0 && (
-          <ul>
-            {errors.map((error) => (
-              <li className="text-red-500" key={error}>
-                {error}
-              </li>
-            ))}
-          </ul>
+          <>
+            <p className="text-gray-500">Please fix the following:</p>
+            <ul>
+              {errors.map((error) => (
+                <li className="text-red-500" key={error}>
+                  {error}
+                </li>
+              ))}
+            </ul>
+          </>
         )}
         {isLoading ? <LoadingSpinner /> : <Button>Login</Button>}
       </form>
