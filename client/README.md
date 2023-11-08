@@ -1,0 +1,5 @@
+##start server
+
+```
+pnpm dev
+```
