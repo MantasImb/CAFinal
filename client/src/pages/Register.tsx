@@ -75,10 +75,14 @@ export default function Register() {
     if (isError) {
       toast.error(message);
     }
-    if (isSuccess || user) {
-      toast.success(message);
+    if (isSuccess && user) {
+      message && toast.success(message);
       dispatch(reset());
-      navigate("/");
+      navigate("/organisation/register");
+    }
+
+    if (user) {
+      navigate("/organisation/register");
     }
 
     dispatch(reset());
@@ -123,9 +127,13 @@ export default function Register() {
   }
 
   return (
-    <div>
-      <h1 className="">Register</h1>
-      <form action="submit" onSubmit={onSubmit}>
+    <div className="flex flex-col items-center gap-4 p-4">
+      <h1 className="text-3xl font-bold text-gray-500">Register</h1>
+      <form
+        className="flex flex-col items-center gap-2 border rounded-md p-4"
+        action="submit"
+        onSubmit={onSubmit}
+      >
         {formInputs.map((input) => (
           <Input
             key={input.name}
@@ -139,13 +147,16 @@ export default function Register() {
           />
         ))}
         {errors.length > 0 && (
-          <ul>
-            {errors.map((error) => (
-              <li className="text-red-500" key={error}>
-                {error}
-              </li>
-            ))}
-          </ul>
+          <>
+            <p className="text-gray-500">Please fix the following:</p>
+            <ul className="flex flex-col items-center text-md">
+              {errors.map((error) => (
+                <li className="text-red-500" key={error}>
+                  {error}
+                </li>
+              ))}
+            </ul>
+          </>
         )}
         {isLoading ? <LoadingSpinner /> : <Button>Register</Button>}
       </form>

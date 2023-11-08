@@ -20,7 +20,7 @@ type OrganisationType = {
 };
 
 const initialState = {
-  organisation: null as OrganisationType | null,
+  organisation: null as OrganisationType | null | undefined,
   isError: false,
   isSuccess: false,
   isLoading: false,
@@ -55,7 +55,7 @@ export const registerOrganisation = createAsyncThunk<
 // Get organisation that user is owner of
 export const getOwnerOrganisation = createAsyncThunk<
   // data return type
-  OrganisationType,
+  OrganisationType | undefined,
   // payload type
   undefined,
   // thunkAPI type
@@ -63,6 +63,7 @@ export const getOwnerOrganisation = createAsyncThunk<
 >("organisation/getOwnerOrganisation", async (_, thunkAPI) => {
   try {
     const user = thunkAPI.getState().auth.user;
+
     if (!user) throw new Error("User not logged in");
 
     return await organisationService.getOwnerOrganisation(user.token);
@@ -168,6 +169,7 @@ export const organisationSlice = createSlice({
   initialState,
   reducers: {
     reset: (state) => {
+      state.organisation = null;
       state.isError = false;
       state.isSuccess = false;
       state.isLoading = false;

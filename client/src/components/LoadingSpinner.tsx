@@ -1,16 +1,13 @@
 import React from "react";
 
-interface SpinnerProps {
-  size?: number;
-}
-
-const Spinner: React.FC<SpinnerProps> = ({ size = 6 }) => {
+const Spinner: React.FC = () => {
   return (
-    <div className="flex justify-center">
+    <div className="flex items-center justify-center">
       <div
-        className="border-4 border-t-transparent border-r-transparent border-b-transparent border-l-white animate-spin"
-        style={{ width: `${size}rem`, height: `${size}rem` }}
-      ></div>
+        className={`animate-spin rounded-full border-t-2 border-b-2 border-gray-900`}
+      >
+        B<span className="text-pink-700">b</span>
+      </div>
     </div>
   );
 };

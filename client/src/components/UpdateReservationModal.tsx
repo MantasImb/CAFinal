@@ -33,7 +33,7 @@ export default function UpdateReservationModal({
 
   return (
     <>
-      <Button onClick={() => setIsOpen(true)} disabled={isLoading}>
+      <Button onClick={() => setIsOpen(true)} disabled={isLoading} type="mini">
         Update
       </Button>
       <Modal

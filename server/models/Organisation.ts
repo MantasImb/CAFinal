@@ -2,11 +2,8 @@ import mongoose from "mongoose";
 
 const reservationSchema = new mongoose.Schema({
   _id: {
-    // generate a random id
     type: String,
-    default: () => {
-      return Math.random().toString(36).substr(2, 9);
-    },
+    required: [true, "Id is required"],
   },
   name: {
     type: String,

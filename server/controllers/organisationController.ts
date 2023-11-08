@@ -3,7 +3,6 @@ import { type AuthorisedRequest } from "../middlewares/auth";
 import z from "zod";
 import { Organisation } from "../models/Organisation";
 import { AppError } from "../middlewares/errorHandler";
-import mongoose from "mongoose";
 
 // TODO: make a separate function method to get organisation by id?
 
@@ -118,7 +117,10 @@ export async function createReservation(
 
     if (!organisation) throw new AppError("Organisation not found", 404);
 
+    const _id = new Date().getTime().toString();
+
     const reservation = {
+      _id,
       name,
       surname,
       email,
@@ -198,7 +200,15 @@ export async function deleteReservation(
 
     if (!organisation) throw new AppError("Organisation not found", 404);
 
-    organisation.reservations.pull(reservationId);
+    const reservation = organisation.reservations.find((reservation) => {
+      return reservation._id.toString() === reservationId;
+    });
+
+    if (!reservation) throw new AppError("Reservation not found", 404);
+
+    organisation.reservations.pull(reservation);
+
+    organisation.save();
 
     res.status(200).json({ reservationId });
   } catch (error) {

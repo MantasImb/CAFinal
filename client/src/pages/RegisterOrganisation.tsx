@@ -45,9 +45,14 @@ export default function RegisterOrganisation() {
     if (isError) {
       toast.error(message);
     }
-    if (isSuccess || organisation) {
+    if (isSuccess && organisation) {
       message && toast.success(message);
       dispatch(reset());
+      console.log("NAVIGATING");
+      navigate("/");
+    }
+
+    if (organisation) {
       navigate("/");
     }
 
@@ -81,9 +86,15 @@ export default function RegisterOrganisation() {
   }
 
   return (
-    <div>
-      <h1 className="">Register organisation</h1>
-      <form action="submit" onSubmit={onSubmit}>
+    <div className="flex flex-col items-center gap-4 p-4">
+      <h1 className="text-3xl font-bold text-gray-500">
+        Register your Organisation
+      </h1>
+      <form
+        action="submit"
+        onSubmit={onSubmit}
+        className="flex flex-col items-center gap-2 border rounded-md p-4"
+      >
         {formInputs.map((input) => (
           <Input
             key={input.name}

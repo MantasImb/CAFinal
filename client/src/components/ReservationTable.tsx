@@ -8,6 +8,8 @@ import {
 import { type AppDispatch } from "../app/store";
 import UpdateReservationModal from "./UpdateReservationModal";
 
+import { FaRegTrashCan } from "react-icons/fa6";
+
 export default function ReservationTable({
   data,
 }: {
@@ -21,40 +23,39 @@ export default function ReservationTable({
   }
 
   return (
-    <div>
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Time</th>
-            <th>Name</th>
-            <th>Surname</th>
-            <th>Email</th>
-            <th>Actions</th>
+    <table className="w-full text-center">
+      <thead className="text-gray-500 border-b border-gray-300">
+        <tr>
+          <th className="font-normal py-3">Date</th>
+          <th className="font-normal py-3">Time</th>
+          <th className="font-normal py-3">Name</th>
+          <th className="font-normal py-3">Surname</th>
+          <th className="font-normal py-3">Email</th>
+        </tr>
+      </thead>
+      <tbody>
+        {data.map((row, index) => (
+          <tr key={`${row.timestamp} ${index}`}>
+            <td className="py-2">{getDateString(row.timestamp)}</td>
+            <td className="py-2">{getTimeString(row.timestamp)}</td>
+            <td className="py-2">{row.name}</td>
+            <td className="py-2">{row.surname}</td>
+            <td className="py-2">{row.email}</td>
+            <td className="py-2">
+              <UpdateReservationModal reservationId={row._id} />
+            </td>
+            <td className="py-1">
+              <button
+                disabled={isLoading}
+                onClick={() => handleDelete(row._id)}
+              >
+                <FaRegTrashCan className={isLoading && "text-gray-400"} />
+              </button>
+            </td>
           </tr>
-        </thead>
-        <tbody>
-          {data.map((row) => (
-            <tr key={`${row.email} ${row.timestamp}`}>
-              <td>{getDateString(row.timestamp)}</td>
-              <td>{getTimeString(row.timestamp)}</td>
-              <td>{row.name}</td>
-              <td>{row.surname}</td>
-              <td>{row.email}</td>
-              <td>
-                <button
-                  disabled={isLoading}
-                  onClick={() => handleDelete(row._id)}
-                >
-                  Cancel
-                </button>
-                <UpdateReservationModal reservationId={row._id} />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+        ))}
+      </tbody>
+    </table>
   );
 }
 
@@ -67,5 +68,11 @@ function getDateString(timestamp: number) {
 
 function getTimeString(timestamp: number) {
   const date = new Date(timestamp);
-  return `${date.getHours()}:${date.getMinutes()}`;
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  return `${appendZero(hours)}:${appendZero(minutes)}`;
+}
+
+function appendZero(number: number) {
+  return number < 10 ? `0${number}` : number;
 }
